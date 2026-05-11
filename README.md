@@ -63,24 +63,27 @@ Protocolos HTTPS/REST. Uso de JSON nas mensagens da fila SQS. Contratos de API c
 
 ### 2.1. Acesso ao repositório
 
+**Repositório GitHub**: https://github.com/tnnovak/exercicio-arq
+
 ```bash
-git clone https://github.com/seu-usuario/merchant-processing.git
-cd merchant-processing
+git clone https://github.com/tnnovak/exercicio-arq.git
+cd exercicio-arq
 ```
 
-**Estrutura do repositório**:
+**Estrutura atual do repositório**:
 ```
-merchant-processing/
-├── src/
-│   ├── MerchantProcessing.Lancamentos.Api/
-│   ├── MerchantProcessing.Consolidado.Api/
-│   ├── MerchantProcessing.Consolidator.Worker/
-│   ├── MerchantProcessing.Domain/
-│   └── MerchantProcessing.Infrastructure/
-├── tests/
-├── infrastructure/        # Terraform files
-├── docker-compose.yml
-└── README.md
+exercicio-arq/
+├── README.md                                  # Documentação da arquitetura
+├── desenho-arq.jpg                           # Diagrama da arquitetura
+├── desafio-arquiteto-software-out2024 1.pdf  # Especificação do desafio
+└── src/                                      # (A ser implementado)
+    ├── MerchantProcessing.Lancamentos.Api/
+    ├── MerchantProcessing.Consolidado.Api/
+    ├── MerchantProcessing.Consolidator.Worker/
+    ├── MerchantProcessing.Domain/
+    ├── MerchantProcessing.Infrastructure/
+    ├── tests/
+    └── infrastructure/                       # Terraform files
 ```
 
 ### 2.2. Como buildar e rodar localmente
