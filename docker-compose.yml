@@ -9,7 +9,7 @@ services:
       POSTGRES_USER: merchant
       POSTGRES_PASSWORD: merchant123
     ports:
-      - "5432:5432"
+      - "5433:5432"  # Changed to 5433 to avoid conflict with host PostgreSQL
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -55,7 +55,7 @@ services:
       dockerfile: src/MerchantProcessing.Lancamentos.Api/Dockerfile
     container_name: lancamentos-api
     ports:
-      - "5001:80"
+      - "5001:8080"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__DefaultConnection=Host=postgres;Database=merchantdb;Username=merchant;Password=merchant123
@@ -76,7 +76,7 @@ services:
       dockerfile: src/MerchantProcessing.Consolidado.Api/Dockerfile
     container_name: consolidado-api
     ports:
-      - "5002:80"
+      - "5002:8080"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__DefaultConnection=Host=postgres;Database=merchantdb;Username=merchant;Password=merchant123

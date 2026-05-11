@@ -83,7 +83,7 @@ curl -X POST http://localhost:5001/api/lancamentos \
   -H "Idempotency-Key: test-$(date +%s)" \
   -d '{
     "accountId": "00000000-0000-0000-0000-000000000001",
-    "type": 0,
+    "type": 1,
     "amount": 100.00,
     "idempotencyKey": "credit-test-'$(date +%s)'"
   }'
@@ -97,7 +97,7 @@ curl -X POST http://localhost:5001/api/lancamentos \
   -H "Idempotency-Key: debit-$(date +%s)" \
   -d '{
     "accountId": "00000000-0000-0000-0000-000000000001",
-    "type": 1,
+    "type": 2,
     "amount": 50.00,
     "idempotencyKey": "debit-test-'$(date +%s)'"
   }'
@@ -229,8 +229,8 @@ docker-compose down -v
 
 ## 10. Tipos de Transação
 
-- `type: 0` → **Credit** (Crédito - aumenta saldo)
-- `type: 1` → **Debit** (Débito - diminui saldo)
+- `type: 1` → **Credit** (Crédito - aumenta saldo)
+- `type: 2` → **Debit** (Débito - diminui saldo)
 
 ---
 

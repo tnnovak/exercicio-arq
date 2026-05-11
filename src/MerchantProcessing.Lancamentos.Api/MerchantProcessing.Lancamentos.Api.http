@@ -14,7 +14,7 @@ Idempotency-Key: credit-test-{{$randomInt 1000 9999}}
 
 {
   "accountId": "{{accountId}}",
-  "type": 0,
+  "type": 1,
   "amount": 100.00,
   "idempotencyKey": "credit-test-{{$timestamp}}"
 }
@@ -28,7 +28,7 @@ Idempotency-Key: debit-test-{{$randomInt 1000 9999}}
 
 {
   "accountId": "{{accountId}}",
-  "type": 1,
+  "type": 2,
   "amount": 50.00,
   "idempotencyKey": "debit-test-{{$timestamp}}"
 }
@@ -42,7 +42,7 @@ Idempotency-Key: large-credit-{{$randomInt 1000 9999}}
 
 {
   "accountId": "{{accountId}}",
-  "type": 0,
+  "type": 1,
   "amount": 1000.00,
   "idempotencyKey": "large-credit-{{$timestamp}}"
 }
@@ -56,7 +56,7 @@ Idempotency-Key: idempotency-test-123
 
 {
   "accountId": "{{accountId}}",
-  "type": 0,
+  "type": 1,
   "amount": 25.00,
   "idempotencyKey": "idempotency-test-123"
 }
@@ -64,7 +64,7 @@ Idempotency-Key: idempotency-test-123
 ###
 
 ### Notes:
-# - Type: 0 = Credit, 1 = Debit
+# - Type: 1 = Credit, 2 = Debit
 # - Idempotency-Key ensures duplicate requests return the same response
 # - AccountId needs to exist in database first
 # - Use docker-compose to run dependencies (PostgreSQL, Redis, LocalStack)

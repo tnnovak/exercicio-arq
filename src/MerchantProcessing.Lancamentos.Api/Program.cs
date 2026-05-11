@@ -1,44 +1,57 @@
+using MerchantProcessing.Infrastructure.Data;
+using MerchantProcessing.Infrastructure.Services;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+// Add services to the container
+builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Database configuration
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
+    ?? "Host=localhost;Database=merchantdb;Username=merchant;Password=merchant123";
+
+builder.Services.AddDbContext<MerchantDbContext>(options =>
+    options.UseNpgsql(connectionString));
+
+// Redis Cache configuration
+var redisConnection = builder.Configuration.GetValue<string>("Redis:ConnectionString") 
+    ?? "localhost:6379";
+
+builder.Services.AddSingleton<StackExchange.Redis.IConnectionMultiplexer>(
+    StackExchange.Redis.ConnectionMultiplexer.Connect(redisConnection));
+
+builder.Services.AddSingleton<ICacheService, RedisCacheService>();
+
+// AWS SQS configuration
+var sqsQueueUrl = builder.Configuration.GetValue<string>("AWS:SQS:QueueUrl") 
+    ?? "http://localhost:4566/000000000000/transaction-events";
+var sqsServiceUrl = builder.Configuration.GetValue<string>("AWS:SQS:ServiceUrl") 
+    ?? "http://localhost:4566";
+
+builder.Services.AddSingleton<Amazon.SQS.IAmazonSQS>(sp =>
+{
+    var config = new Amazon.SQS.AmazonSQSConfig
+    {
+        ServiceURL = sqsServiceUrl
+    };
+    return new Amazon.SQS.AmazonSQSClient(config);
+});
+
+builder.Services.AddSingleton<IMessageQueueService>(sp =>
+    new SqsService(sp.GetRequiredService<Amazon.SQS.IAmazonSQS>(), sqsQueueUrl));
+
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
-
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast")
-.WithOpenApi();
+app.MapControllers();
 
 app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
