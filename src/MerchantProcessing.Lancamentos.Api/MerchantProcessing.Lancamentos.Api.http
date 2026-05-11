@@ -1,6 +1,70 @@
-@MerchantProcessing.Lancamentos.Api_HostAddress = http://localhost:5052
+@baseUrl = http://localhost:5001
+@accountId = 00000000-0000-0000-0000-000000000001
 
-GET {{MerchantProcessing.Lancamentos.Api_HostAddress}}/weatherforecast/
+### Health Check
+GET {{baseUrl}}/health
 Accept: application/json
 
 ###
+
+### Create Transaction - Credit (Crédito de R$ 100,00)
+POST {{baseUrl}}/api/lancamentos
+Content-Type: application/json
+Idempotency-Key: credit-test-{{$randomInt 1000 9999}}
+
+{
+  "accountId": "{{accountId}}",
+  "type": 0,
+  "amount": 100.00,
+  "idempotencyKey": "credit-test-{{$timestamp}}"
+}
+
+###
+
+### Create Transaction - Debit (Débito de R$ 50,00)
+POST {{baseUrl}}/api/lancamentos
+Content-Type: application/json
+Idempotency-Key: debit-test-{{$randomInt 1000 9999}}
+
+{
+  "accountId": "{{accountId}}",
+  "type": 1,
+  "amount": 50.00,
+  "idempotencyKey": "debit-test-{{$timestamp}}"
+}
+
+###
+
+### Create Transaction - Large Credit (Crédito de R$ 1000,00)
+POST {{baseUrl}}/api/lancamentos
+Content-Type: application/json
+Idempotency-Key: large-credit-{{$randomInt 1000 9999}}
+
+{
+  "accountId": "{{accountId}}",
+  "type": 0,
+  "amount": 1000.00,
+  "idempotencyKey": "large-credit-{{$timestamp}}"
+}
+
+###
+
+### Test Idempotency - Same key should return cached response
+POST {{baseUrl}}/api/lancamentos
+Content-Type: application/json
+Idempotency-Key: idempotency-test-123
+
+{
+  "accountId": "{{accountId}}",
+  "type": 0,
+  "amount": 25.00,
+  "idempotencyKey": "idempotency-test-123"
+}
+
+###
+
+### Notes:
+# - Type: 0 = Credit, 1 = Debit
+# - Idempotency-Key ensures duplicate requests return the same response
+# - AccountId needs to exist in database first
+# - Use docker-compose to run dependencies (PostgreSQL, Redis, LocalStack)
