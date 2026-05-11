@@ -1,0 +1,113 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: merchant-postgres
+    environment:
+      POSTGRES_DB: merchantdb
+      POSTGRES_USER: merchant
+      POSTGRES_PASSWORD: merchant123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U merchant"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: merchant-redis
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  localstack:
+    image: localstack/localstack:latest
+    container_name: merchant-localstack
+    ports:
+      - "4566:4566"  # LocalStack edge port
+    environment:
+      - SERVICES=sqs
+      - DEBUG=1
+      - DATA_DIR=/tmp/localstack/data
+    volumes:
+      - localstack_data:/tmp/localstack
+    healthcheck:
+      test: ["CMD", "awslocal", "sqs", "list-queues"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  lancamentos-api:
+    build:
+      context: .
+      dockerfile: src/MerchantProcessing.Lancamentos.Api/Dockerfile
+    container_name: lancamentos-api
+    ports:
+      - "5001:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Host=postgres;Database=merchantdb;Username=merchant;Password=merchant123
+      - Redis__ConnectionString=redis:6379
+      - AWS__SQS__QueueUrl=http://localstack:4566/000000000000/transaction-events
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      localstack:
+        condition: service_started
+    restart: unless-stopped
+
+  consolidado-api:
+    build:
+      context: .
+      dockerfile: src/MerchantProcessing.Consolidado.Api/Dockerfile
+    container_name: consolidado-api
+    ports:
+      - "5002:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Host=postgres;Database=merchantdb;Username=merchant;Password=merchant123
+      - Redis__ConnectionString=redis:6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  consolidator-worker:
+    build:
+      context: .
+      dockerfile: src/MerchantProcessing.Consolidator.Worker/Dockerfile
+    container_name: consolidator-worker
+    environment:
+      - DOTNET_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Host=postgres;Database=merchantdb;Username=merchant;Password=merchant123
+      - Redis__ConnectionString=redis:6379
+      - AWS__SQS__QueueUrl=http://localstack:4566/000000000000/transaction-events
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      localstack:
+        condition: service_started
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
+  localstack_data:

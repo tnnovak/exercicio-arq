@@ -1,0 +1,55 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{363D2901-7122-403B-A7B6-EC0511A43A5C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MerchantProcessing.Domain", "src\MerchantProcessing.Domain\MerchantProcessing.Domain.csproj", "{32A52C32-3317-4129-834C-13FD8906EFAF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MerchantProcessing.Infrastructure", "src\MerchantProcessing.Infrastructure\MerchantProcessing.Infrastructure.csproj", "{1DED5155-CBC4-4FB9-A486-AE79DE9D887C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MerchantProcessing.Lancamentos.Api", "src\MerchantProcessing.Lancamentos.Api\MerchantProcessing.Lancamentos.Api.csproj", "{F5F0C6C0-1860-4786-A5D2-436ED7C172BA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MerchantProcessing.Consolidado.Api", "src\MerchantProcessing.Consolidado.Api\MerchantProcessing.Consolidado.Api.csproj", "{AEC82FED-659A-4EB6-BCE2-B633F703D6D6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MerchantProcessing.Consolidator.Worker", "src\MerchantProcessing.Consolidator.Worker\MerchantProcessing.Consolidator.Worker.csproj", "{7D7650F3-2AC9-4998-8328-947E7C52996D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{32A52C32-3317-4129-834C-13FD8906EFAF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{32A52C32-3317-4129-834C-13FD8906EFAF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{32A52C32-3317-4129-834C-13FD8906EFAF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{32A52C32-3317-4129-834C-13FD8906EFAF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1DED5155-CBC4-4FB9-A486-AE79DE9D887C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1DED5155-CBC4-4FB9-A486-AE79DE9D887C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1DED5155-CBC4-4FB9-A486-AE79DE9D887C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1DED5155-CBC4-4FB9-A486-AE79DE9D887C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F5F0C6C0-1860-4786-A5D2-436ED7C172BA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F5F0C6C0-1860-4786-A5D2-436ED7C172BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F5F0C6C0-1860-4786-A5D2-436ED7C172BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F5F0C6C0-1860-4786-A5D2-436ED7C172BA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AEC82FED-659A-4EB6-BCE2-B633F703D6D6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AEC82FED-659A-4EB6-BCE2-B633F703D6D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AEC82FED-659A-4EB6-BCE2-B633F703D6D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AEC82FED-659A-4EB6-BCE2-B633F703D6D6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7D7650F3-2AC9-4998-8328-947E7C52996D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7D7650F3-2AC9-4998-8328-947E7C52996D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7D7650F3-2AC9-4998-8328-947E7C52996D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7D7650F3-2AC9-4998-8328-947E7C52996D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{32A52C32-3317-4129-834C-13FD8906EFAF} = {363D2901-7122-403B-A7B6-EC0511A43A5C}
+		{1DED5155-CBC4-4FB9-A486-AE79DE9D887C} = {363D2901-7122-403B-A7B6-EC0511A43A5C}
+		{F5F0C6C0-1860-4786-A5D2-436ED7C172BA} = {363D2901-7122-403B-A7B6-EC0511A43A5C}
+		{AEC82FED-659A-4EB6-BCE2-B633F703D6D6} = {363D2901-7122-403B-A7B6-EC0511A43A5C}
+		{7D7650F3-2AC9-4998-8328-947E7C52996D} = {363D2901-7122-403B-A7B6-EC0511A43A5C}
+	EndGlobalSection
+EndGlobal
