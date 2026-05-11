@@ -17,7 +17,7 @@
 
 ### Arquitetura recomendada
 
-![Arquitetura da Solução](desenho-arq.jpg)
+![Arquitetura da Solução](https://github.com/tnnovak/exercicio-arq/blob/main/desenho-arq.jpg)
 
 **Solução hospedada na AWS**
 
