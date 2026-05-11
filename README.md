@@ -183,7 +183,131 @@ docker build -f src/MerchantProcessing.Consolidator.Worker/Dockerfile -t consoli
 - StackExchange.Redis 2.12.14
 - Microsoft.EntityFrameworkCore.Design 8.0.7
 
-### 2.3. Criar infraestrutura na AWS
+### 2.3. Testar o sistema localmente
+
+#### 2.3.1. Preparar o ambiente
+
+**Criar a conta de teste**:
+
+```bash
+# Criar dados de teste no banco
+docker exec -i testopah-postgres-1 psql -U merchant -d merchantdb < tests/setup-test-data.sql
+```
+
+Isso cria uma conta com ID: `00000000-0000-0000-0000-000000000001`
+
+#### 2.3.2. Testar via VS Code REST Client (RECOMENDADO)
+
+**1. Instale a extensão REST Client no VS Code**
+
+**2. Abra os arquivos de teste:**
+- `src/MerchantProcessing.Lancamentos.Api/MerchantProcessing.Lancamentos.Api.http`
+- `src/MerchantProcessing.Consolidado.Api/MerchantProcessing.Consolidado.Api.http`
+
+**3. Clique em "Send Request" para executar:**
+
+**Criar transação de crédito (R$ 100,00)**:
+```http
+POST http://localhost:5001/api/lancamentos
+Content-Type: application/json
+Idempotency-Key: credit-test-1234
+
+{
+  "accountId": "00000000-0000-0000-0000-000000000001",
+  "type": 0,
+  "amount": 100.00,
+  "idempotencyKey": "credit-test-12345"
+}
+```
+
+**Criar transação de débito (R$ 50,00)**:
+```http
+POST http://localhost:5001/api/lancamentos
+Content-Type: application/json
+Idempotency-Key: debit-test-5678
+
+{
+  "accountId": "00000000-0000-0000-0000-000000000001",
+  "type": 1,
+  "amount": 50.00,
+  "idempotencyKey": "debit-test-5678"
+}
+```
+
+**Consultar saldo atual**:
+```http
+GET http://localhost:5002/api/consolidado/saldo/atual?accountId=00000000-0000-0000-0000-000000000001
+```
+
+#### 2.3.3. Testar via cURL (Terminal)
+
+**Criar crédito de R$ 100**:
+
+```bash
+curl -X POST http://localhost:5001/api/lancamentos \
+  -H "Content-Type: application/json" \
+  -H "Idempotency-Key: test-$(date +%s)" \
+  -d '{
+    "accountId": "00000000-0000-0000-0000-000000000001",
+    "type": 0,
+    "amount": 100.00,
+    "idempotencyKey": "credit-'$(date +%s)'"
+  }'
+```
+
+**Criar débito de R$ 50**:
+
+```bash
+curl -X POST http://localhost:5001/api/lancamentos \
+  -H "Content-Type: application/json" \
+  -H "Idempotency-Key: debit-$(date +%s)" \
+  -d '{
+    "accountId": "00000000-0000-0000-0000-000000000001",
+    "type": 1,
+    "amount": 50.00,
+    "idempotencyKey": "debit-'$(date +%s)'"
+  }'
+```
+
+**Consultar saldo**:
+
+```bash
+curl "http://localhost:5002/api/consolidado/saldo/atual?accountId=00000000-0000-0000-0000-000000000001"
+```
+
+#### 2.3.4. Verificar resultados
+
+**Ver transações no banco**:
+
+```bash
+docker exec -it testopah-postgres-1 psql -U merchant -d merchantdb -c \
+  "SELECT * FROM \"Transactions\" ORDER BY \"Timestamp\" DESC LIMIT 5;"
+```
+
+**Ver saldo da conta**:
+
+```bash
+docker exec -it testopah-postgres-1 psql -U merchant -d merchantdb -c \
+  "SELECT * FROM \"Accounts\" WHERE \"Id\" = '00000000-0000-0000-0000-000000000001';"
+```
+
+**Ver cache no Redis**:
+
+```bash
+docker exec -it testopah-redis-1 redis-cli KEYS "*"
+```
+
+#### 2.3.5. Documentação completa de testes
+
+Para mais exemplos e troubleshooting, consulte: **[tests/TESTING_GUIDE.md](tests/TESTING_GUIDE.md)**
+
+**Tipos de transação:**
+- `type: 0` → Credit (Crédito - aumenta saldo)
+- `type: 1` → Debit (Débito - diminui saldo)
+
+---
+
+### 2.4. Criar infraestrutura na AWS
 
 **Usando Terraform**:
 
@@ -196,7 +320,7 @@ terraform apply tfplan
 
 **Recursos criados**: VPC, RDS PostgreSQL + replica, ElastiCache Redis, ECS Cluster, ALBs, API Gateway, SQS, Cognito, CloudWatch, IAM roles e Security Groups.
 
-### 2.4. Pipeline CI/CD e integração com AWS ECR
+### 2.5. Pipeline CI/CD e integração com AWS ECR
 
 **GitHub Actions** (`.github/workflows/deploy.yml`):
 
@@ -226,7 +350,7 @@ jobs:
           docker push ${{ steps.login-ecr.outputs.registry }}/lancamentos-api:${{ github.sha }}
 ```
 
-### 2.5. Criar e publicar imagens Docker no ECR
+### 2.6. Criar e publicar imagens Docker no ECR
 
 ```bash
 # Criar repositórios ECR
@@ -243,7 +367,7 @@ docker tag lancamentos-api:latest <account-id>.dkr.ecr.us-east-1.amazonaws.com/l
 docker push <account-id>.dkr.ecr.us-east-1.amazonaws.com/lancamentos-api:v1.0.0
 ```
 
-### 2.6. Deploy ECR → ECS
+### 2.7. Deploy ECR → ECS
 
 **Deploy manual**:
 
