@@ -33,7 +33,10 @@ public class RedisCacheService : ICacheService
     public async Task SetAsync<T>(string key, T value, TimeSpan? expiration = null, CancellationToken cancellationToken = default)
     {
         var serialized = JsonSerializer.Serialize(value);
-        await _database.StringSetAsync(key, serialized, expiration);
+        if (expiration.HasValue)
+            await _database.StringSetAsync(key, serialized, expiration.Value);
+        else
+            await _database.StringSetAsync(key, serialized);
     }
 
     public async Task RemoveAsync(string key, CancellationToken cancellationToken = default)

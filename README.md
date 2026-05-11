@@ -74,44 +74,114 @@ cd exercicio-arq
 ```
 exercicio-arq/
 ├── README.md                                  # Documentação da arquitetura
+├── IMPLEMENTATION.md                          # Detalhes de implementação
+├── COMPLETE_SUMMARY.md                        # Sumário técnico completo
 ├── desenho-arq.jpg                           # Diagrama da arquitetura
 ├── desafio-arquiteto-software-out2024 1.pdf  # Especificação do desafio
-└── src/                                      # (A ser implementado)
-    ├── MerchantProcessing.Lancamentos.Api/
-    ├── MerchantProcessing.Consolidado.Api/
-    ├── MerchantProcessing.Consolidator.Worker/
-    ├── MerchantProcessing.Domain/
-    ├── MerchantProcessing.Infrastructure/
-    ├── tests/
+├── MerchantProcessing.sln                    # Solution .NET 8
+├── .gitignore                                # Exclusões do Git
+├── docker-compose.yml                        # Ambiente local completo
+├── src/
+│   ├── MerchantProcessing.Domain/
+│   │   ├── Entities/
+│   │   │   ├── Account.cs
+│   │   │   ├── Transaction.cs
+│   │   │   ├── ConsolidatedDaily.cs
+│   │   │   └── IdempotencyKey.cs
+│   │   ├── Enums/
+│   │   │   └── TransactionType.cs
+│   │   ├── Events/
+│   │   │   └── TransactionEvent.cs
+│   │   └── DTOs/
+│   │       └── ApiModels.cs
+│   ├── MerchantProcessing.Infrastructure/
+│   │   ├── Data/
+│   │   │   └── MerchantDbContext.cs
+│   │   └── Services/
+│   │       ├── SqsService.cs
+│   │       └── RedisCacheService.cs
+│   ├── MerchantProcessing.Lancamentos.Api/
+│   │   ├── Controllers/
+│   │   │   └── LancamentosController.cs
+│   │   ├── Program.cs
+│   │   ├── appsettings.json
+│   │   └── Dockerfile
+│   ├── MerchantProcessing.Consolidado.Api/
+│   │   ├── Controllers/
+│   │   │   └── ConsolidadoController.cs
+│   │   ├── Program.cs
+│   │   ├── appsettings.json
+│   │   └── Dockerfile
+│   └── MerchantProcessing.Consolidator.Worker/
+│       ├── Workers/
+│       │   └── ConsolidatorWorker.cs
+│       ├── Program.cs
+│       ├── appsettings.json
+│       └── Dockerfile
+└── infrastructure/
+    └── terraform/
+        ├── main.tf
+        ├── variables.tf
+        └── outputs.tf
     └── infrastructure/                       # Terraform files
 ```
 
 ### 2.2. Como buildar e rodar localmente
 
-**Pré-requisitos**: .NET 8 SDK, Docker Desktop, AWS CLI
+**Pré-requisitos**: .NET 8 SDK, Docker Desktop
 
-**Executar com Docker Compose**:
+**Build da solução completa**:
 
 ```bash
-# Subir dependências (PostgreSQL, Redis, LocalStack para SQS)
-docker-compose up -d
+# Restaurar dependências e buildar
+cd /home/novak/TestOpah
+dotnet restore
+dotnet build
 
-# Aplicar migrations
-dotnet ef database update --project src/MerchantProcessing.Lancamentos.Api
-
-# Rodar serviços
-dotnet run --project src/MerchantProcessing.Lancamentos.Api
-dotnet run --project src/MerchantProcessing.Consolidado.Api
-dotnet run --project src/MerchantProcessing.Consolidator.Worker
+# Todos os projetos devem compilar com sucesso
 ```
 
-**Build de imagens Docker**:
+**Executar com Docker Compose (RECOMENDADO)**:
+
+```bash
+# Subir todos os serviços (PostgreSQL, Redis, LocalStack, APIs e Worker)
+docker-compose up -d
+
+# Ver logs
+docker-compose logs -f
+
+# Ver logs de um serviço específico
+docker-compose logs -f lancamentos-api
+docker-compose logs -f consolidado-api
+docker-compose logs -f consolidator-worker
+
+# Parar todos os serviços
+docker-compose down
+```
+
+**Rodar serviços individualmente (desenvolvimento)**:
+
+```bash
+# Rodar apenas as APIs (requer PostgreSQL e Redis rodando)
+dotnet run --project src/MerchantProcessing.Lancamentos.Api     # Port 5001
+dotnet run --project src/MerchantProcessing.Consolidado.Api     # Port 5002
+dotnet run --project src/MerchantProcessing.Consolidator.Worker # Background
+```
+
+**Build de imagens Docker manualmente**:
 
 ```bash
 docker build -f src/MerchantProcessing.Lancamentos.Api/Dockerfile -t lancamentos-api:latest .
 docker build -f src/MerchantProcessing.Consolidado.Api/Dockerfile -t consolidado-api:latest .
 docker build -f src/MerchantProcessing.Consolidator.Worker/Dockerfile -t consolidator-worker:latest .
 ```
+
+**Pacotes NuGet instalados**:
+- Microsoft.EntityFrameworkCore 8.0.7
+- Npgsql.EntityFrameworkCore.PostgreSQL 8.0.4
+- AWSSDK.SQS 4.0.2.28
+- StackExchange.Redis 2.12.14
+- Microsoft.EntityFrameworkCore.Design 8.0.7
 
 ### 2.3. Criar infraestrutura na AWS
 
